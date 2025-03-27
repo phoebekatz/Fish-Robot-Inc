@@ -37,50 +37,50 @@ void setup() {
 void loop()
 {
   // Get all parameters
-  float xAccel1 = myIMU.readFloatAccelX() - 1.994; //these were the numbers that were showing up when I was attached to the wrong communication ports
-  float yAccel1 = myIMU.readFloatAccelY() - 1.994;
-  float zAccel1 = myIMU.readFloatAccelZ() - 1.994;
+  float xAccel1 = myIMU.readFloatAccelX(); //these were the numbers that were showing up when I was attached to the wrong communication ports
+  float yAccel1 = myIMU.readFloatAccelY();
+  float zAccel1 = myIMU.readFloatAccelZ();
 
-  float xGyro1 = myIMU.readFloatGyroX() - 286.073;
-  float yGyro1 = myIMU.readFloatGyroY()- 286.073;
-  float zGyro1 = myIMU.readFloatGyroZ()- 286.073;
+  float xGyro1 = myIMU.readFloatGyroX();
+  float yGyro1 = myIMU.readFloatGyroY();
+  float zGyro1 = myIMU.readFloatGyroZ();
 
   delay(1000);
 
-  float xAccel2 = myIMU.readFloatAccelX()- 1.994; 
-  float yAccel2 = myIMU.readFloatAccelY()- 1.994;
-  float zAccel2 = myIMU.readFloatAccelZ()- 1.994;
+  // float xAccel2 = myIMU.readFloatAccelX()- 1.994; 
+  // float yAccel2 = myIMU.readFloatAccelY()- 1.994;
+  // float zAccel2 = myIMU.readFloatAccelZ()- 1.994;
 
-  float xGyro2 = myIMU.readFloatGyroX()- 286.073;
-  float yGyro2 = myIMU.readFloatGyroY()- 286.073;
-  float zGyro2 = myIMU.readFloatGyroZ()- 286.073;
+  // float xGyro2 = myIMU.readFloatGyroX()- 286.073;
+  // float yGyro2 = myIMU.readFloatGyroY()- 286.073;
+  // float zGyro2 = myIMU.readFloatGyroZ()- 286.073;
 
   // change in values
-  float changeXAccel = xAccel2 - xAccel1;
-  float changeYAccel = yAccel2 - yAccel1;
-  float changeZAccel = zAccel2 - zAccel1;
+  // float changeXAccel = xAccel2 - xAccel1;
+  // float changeYAccel = yAccel2 - yAccel1;
+  // float changeZAccel = zAccel2 - zAccel1;
 
-  float changeXGyro = xGyro2 - xGyro1;
-  float changeYGyro = yGyro2 - yGyro1;
-  float changeZGyro = zGyro2 - zGyro1;  
+  // float changeXGyro = xGyro2 - xGyro1;
+  // float changeYGyro = yGyro2 - yGyro1;
+  // float changeZGyro = zGyro2 - zGyro1;  
 
   
   //print changes
   Serial.print("\nAccelerometer:\n");
   Serial.print(" X = ");
-  Serial.println(changeXAccel, 10); //3 is the number of decimal places
+  Serial.println(xAccel1, 10); //10 is the number of decimal places
   Serial.print(" Y = ");
-  Serial.println(changeYAccel, 10);
+  Serial.println(yAccel1, 10);
   Serial.print(" Z = ");
-  Serial.println(changeZAccel, 10);
+  Serial.println(zAccel1, 10);
 
   Serial.print("\nGyroscope:\n");
   Serial.print(" X = ");
-  Serial.println(changeXGyro,10);
+  Serial.println(xGyro1,10);
   Serial.print(" Y = ");
-  Serial.println(changeYGyro,10);
+  Serial.println(yGyro1,10);
   Serial.print(" Z = ");
-  Serial.println(changeZGyro,10);
+  Serial.println(zGyro1,10);
   
-  delay(5000);
+  delay(10);
 }
