@@ -1,13 +1,17 @@
 // Noah Karow March 27, 2025
-// 
+// PEK changes Mar 28, 2025
 // PEK got much of this from Noah's github. PEK changing motor driver code for directionality
+
 /* Things PEK changed: organized some set up code,
  added all motor driver pins and their pin mode settings,
  uncommented the if/else logic around the accelerometer setup,
  removed "=0" from global variable initializations so vars would not be overwritten,
  added to pidTerm >/< 0 logic so all directions will change,
-
+ added some comments for organization and clarification,
+ deleted some content PEK doesn't think will be needed, 
+ changed PWM code from analogWrite to directly setting the duty cycle (OCR2A/OCR2B).
 */
+
 //Sensor Input
 #include "SparkFunLSM6DSO.h"
 #include "Wire.h"
@@ -22,14 +26,13 @@ const int analogIn = A0; // potentiometer 1. blue
 const int analogIn2 = A1; // Potentiometer 2. white
 
 // motor pins. these are all digital. driver 1 controls pins 1 & 4, driver 2 controls coils 2 & 3
-const int forwardDriver1 = 2; //turquoise. DIR pin to control the direction of the motor (clockwise/counter-clockwise)
-const int reverseDriver1 = 3; // blue. driver 1
-const int pwmDriver1 = 4; // orange. driver 1, this is the PWM pin for the motor for how much we move it to correct for its error
+const int pwmDriver1 = 3; // orange. driver 1, this is the PWM pin for the motor for how much we move it to correct for its error
+const int forwardDriver1 = 4; //turquoise. DIR pin to control the direction of the motor (clockwise/counter-clockwise)
+const int reverseDriver1 = 5; // blue. driver 1
 
-const int forwardDriver2 = 5; //driver 2, turquoise 
-const int reverseDriver2 = 6;// driver 2, blue
-const int pwmDriver2 = 7; // driver 2, orange
-
+const int pwmDriver2 = 11; // driver 2, orange
+const int forwardDriver2 = 12; //driver 2, turquoise 
+const int reverseDriver2 = 13;// driver 2, blue
 
 // ****************VARIABLES**********************************************************// VARIABLES
 float ref_pos = 1;
@@ -105,6 +108,12 @@ void setup() {
   pinMode(forwardDriver2, OUTPUT);
   pinMode(reverseDriver2, OUTPUT);
 
+  // PWM
+  TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM21) | _BV(WGM20); // COM: enables non-inverted PWM, WGM: selects fast pwm
+  TCCR2B = _BV(CS22); // prescaler: 64 -> freq ~ 1kHz. **********CHANGE depending on inductance of coils
+  OCR2A = 0; // initially off. motor driver 2
+  OCR2B = 0; // initially off. motor driver 1
+
 }
 
 void loop() {
@@ -170,39 +179,11 @@ void loop() {
     
   }
 
-  analogWrite(pwmDriver1, pidTerm_scaled);
-  analogWrite(pwmDriver2, pidTerm_scaled);
+  OCR2A = pidTerm_scaled; // motor driver 2 set to appropriate value
+  OCR2B = pidTerm_scaled; // motor driver 1 set to appropriate value
 
   Serial.println( (String) "DATA,"+ changeXAngle + "," + changeYAngle + "," + changeZAngle + "," + millis());
 
-
-  // delay(100);
-
-  //print values
-
-  // Serial.print("\nAccelerometer:\n");
-  // Serial.print(" X = ");
-  // Serial.println(myIMU.readFloatAccelX(), 3);
-  // Serial.print(" Y = ");
-  // Serial.println(myIMU.readFloatAccelY(), 3);
-  // Serial.print(" Z = ");
-  // Serial.println(myIMU.readFloatAccelZ(), 3);
-
-  // Serial.print("\nGyroscope:\n");
-  // Serial.print(" X = ");
-  // Serial.println(myIMU.readFloatGyroX(), 3);
-  // Serial.print(" Y = ");
-  // Serial.println(myIMU.readFloatGyroY(), 3);
-  // Serial.print(" Z = ");
-  // Serial.println(myIMU.readFloatGyroZ(), 3);
-
-  // Serial.print("\nThermometer:\n");
-  // Serial.print(" Degrees F = ");
-  // Serial.println(myIMU.readTempF(), 3);
-  
   delay(100);
-  
-
-
 
 }
