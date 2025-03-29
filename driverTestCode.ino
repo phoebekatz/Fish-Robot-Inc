@@ -16,7 +16,7 @@
 #include "SparkFunLSM6DSO.h"
 #include "Wire.h"
 #include "math.h"
-//#include "SPI.h"
+
 
 LSM6DSO myIMU; //Default constructor is I2C, addr 0x6B
 
@@ -39,6 +39,10 @@ float ref_pos = 1;
 double A_r1 = 1;
 double A_r2 = 1;
 
+float x, y, z;           //three axis acceleration data
+float roll, pitch;       //Roll & Pitch are the angles which rotate by the axis X and y
+double position;
+
 //PID
 double setpoint, input;
 // double count = 0; //set the counts of the encoder
@@ -56,15 +60,21 @@ float changeError;
 float totalError;
 float pidTerm;
 float pidTerm_scaled;// if the total gain we get is not in the PWM range we scale it down so that it's not bigger than |255|
-long prev_time;
+
 
 void Angle2Position()
 {
-
+  //use geometry to get position from pitch
+  // position = ___;
 }
 
+void RP_calculate(){
+  roll = atan2(y , z) * 57.3;
+  pitch = atan2((- x) , sqrt(y * y + z * z)) * 57.3;
+}
+
+
 void PIDcalculation(){
-  //angle = (0.9 * count); //count to angle conversion
   error = setpoint - input;
   
   changeError = error - last_error; // derivative term
@@ -79,10 +89,6 @@ void PIDcalculation(){
 void setup() {
 
   Serial.begin(115200);
-  Serial.println("CLEARSHEET");
-  Serial.println("LABEL,changeXAngle,changeYAngle,changeZAngle,Time");
-  delay(500); //Do I need this?
-  
   // LSM6DSO
   Wire.begin();
   delay(10);
@@ -124,42 +130,19 @@ void loop() {
 
   //LSM6DSO
   //Get all parameters
-  long prev_time = millis();
-  float xAccel1 = myIMU.readFloatAccelX(); //these were the numbers that were showing up when I was attached to the wrong communication ports
-  float yAccel1 = myIMU.readFloatAccelY();
-  float zAccel1 = myIMU.readFloatAccelZ();
+  x = myIMU.readFloatAccelX();
+  y = myIMU.readFloatAccelY();
+  z = myIMU.readFloatAccelZ();
 
-  float xGyro1 = myIMU.readFloatGyroX();
-  float yGyro1 = myIMU.readFloatGyroY();
-  float zGyro1 = myIMU.readFloatGyroZ();
+  RP_calculate();
+  Serial.println(pitch,10);
+  //Serial.println(roll,10);
 
-  delay(10);
+  // PID
 
-  float xAccel2 = myIMU.readFloatAccelX(); 
-  float yAccel2 = myIMU.readFloatAccelY();
-  float zAccel2 = myIMU.readFloatAccelZ();
-
-  float xGyro2 = myIMU.readFloatGyroX();
-  float yGyro2 = myIMU.readFloatGyroY();
-  float zGyro2 = myIMU.readFloatGyroZ();
-
-  // change in values
-  float changeXAccel = xAccel2 - xAccel1;
-  float changeYAccel = yAccel2 - yAccel1;
-  float changeZAccel = zAccel2 - zAccel1;
-
-  float changeXGyro = xGyro2 - xGyro1;
-  float changeYGyro = yGyro2 - yGyro1;
-  float changeZGyro = zGyro2 - zGyro1;
-
-  //change in angular position
-  long time = millis()-prev_time;
-  float changeXAngle = changeXGyro * time;
-  float changeYAngle = changeYGyro * time;
-  float changeZAngle = changeZGyro * time;
-  input = changeXAngle;
-
+  input = position;
   PIDcalculation();// find PID value
+
   
   if (pidTerm > 0) // coils 1 & 4: Forward. coils 2 & 3: Reverse
   {
@@ -181,8 +164,6 @@ void loop() {
 
   OCR2A = pidTerm_scaled; // motor driver 2 set to appropriate value
   OCR2B = pidTerm_scaled; // motor driver 1 set to appropriate value
-
-  Serial.println( (String) "DATA,"+ changeXAngle + "," + changeYAngle + "," + changeZAngle + "," + millis());
 
   delay(100);
 
